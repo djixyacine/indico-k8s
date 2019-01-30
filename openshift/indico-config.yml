@@ -1,0 +1,15 @@
+# indico's ConfigMap settings
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: settings
+data:
+  secretkey: "pleasechangemeasap"
+  servicehost: "indico-neic-ahm.rahtiapp.fi"
+  serviceport: "80"
+  serviceprotocol: "http"
+  pguser: "indico"
+  pgdatabase: "indico"
+  pgpassword: "indicopass"
+  pghost: "indico-postgres"
+  pgport: "5432"

@@ -1,0 +1,71 @@
+kind: List
+apiVersion: v1
+items:
+
+# indico-redis Volume
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      io.kompose.service: indico-redis-claim0
+    name: indico-redis-claim0
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 100Mi
+  status: {}
+
+# indico-redis Deployment Config
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      io.kompose.service: indico-redis
+    name: indico-redis
+  spec:
+    replicas: 1
+    selector:
+      io.kompose.service: indico-redis
+    template:
+      metadata:
+        labels:
+          io.kompose.service: indico-redis
+      spec:
+        containers:
+        - image: 'docker-registry.rahti.csc.fi/neic/redis:latest'
+          name: indico-redis
+          livenessProbe:
+            exec:
+              command:
+              - redis-cli
+              - PING
+          readinessProbe:
+            exec:
+              command:
+              - redis-cli
+              - PING
+          volumeMounts:
+          - mountPath: /data
+            name: indico-redis-claim0
+        restartPolicy: Always
+        volumes:
+        - name: indico-redis-claim0
+          persistentVolumeClaim:
+            claimName: indico-redis-claim0
+
+# indico-redis Service
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      io.kompose.service: indico-redis
+    name: indico-redis
+  spec:
+    ports:
+    - name: headless
+      port: 6379
+      targetPort: 6379
+    selector:
+      io.kompose.service: indico-redis

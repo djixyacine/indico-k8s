@@ -1,0 +1,51 @@
+kind: List
+apiVersion: v1
+items:
+
+# postgresql Deployment Config
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      io.kompose.service: indico-postgres
+    name: indico-postgres
+  spec:
+    replicas: 1
+    selector:
+      io.kompose.service: indico-postgres
+    strategy:
+      resources: {}
+    template:
+      metadata:
+        labels:
+          io.kompose.service: indico-postgres
+      spec:
+        containers:
+        - env:
+          - name: POSTGRESQL_USER
+            value: indico
+          - name: POSTGRESQL_PASSWORD
+            value: indicopass
+          - name: POSTGRESQL_DATABASE
+            value: indico
+          - name: POSTGRESQL_ADMIN_PASSWORD
+            value: indicopass
+          image: 'docker-registry.rahti.csc.fi/neic/postgresql:latest'
+          name: indico-postgres
+          resources: {}
+        restartPolicy: Always
+
+# postgresql Service
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      io.kompose.service: indico-postgres
+    name: indico-postgres
+  spec:
+    ports:
+    - name: headless
+      port: 5432
+      targetPort: 5432
+    selector:
+      io.kompose.service: indico-postgres

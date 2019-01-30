@@ -1,0 +1,103 @@
+kind: List
+apiVersion: v1
+items:
+
+# indico-celery Deployment Config
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: indico-celery
+    name: indico-celery
+  spec:
+    replicas: 1
+    selector:
+      io.kompose.service: indico-celery
+    strategy:
+      resources: {}
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          io.kompose.service: indico-celery
+      spec:
+        containers:
+        - args:
+          - ./opt/indico/run_celery.sh
+          env:
+          - name: SERVICE_PROTOCOL
+            valueFrom:
+              configMapKeyRef:
+                key: serviceprotocol
+                name: settings
+          - name: SERVICE_HOSTNAME
+            valueFrom:
+              configMapKeyRef:
+                key: servicehost
+                name: settings
+          - name: SERVICE_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: serviceport
+                name: settings
+          - name: PGHOST
+            valueFrom:
+              configMapKeyRef:
+                key: pghost
+                name: settings
+          - name: PGUSER
+            valueFrom:
+              configMapKeyRef:
+                key: pguser
+                name: settings
+          - name: PGPASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: pgpassword
+                name: settings
+          - name: PGDATABASE
+            valueFrom:
+              configMapKeyRef:
+                key: pgdatabase
+                name: settings
+          - name: PGPORT
+            valueFrom:
+              configMapKeyRef:
+                key: pgport
+                name: settings
+          - name: SECRET_KEY
+            valueFrom:
+              configMapKeyRef:
+                key: secretkey
+                name: settings
+          - name: REDIS_CACHE_URL
+            value: redis://indico-redis:6379/1
+          - name: CELERY_BROKER
+            value: redis://indico-redis:6379/0
+          - name: C_FORCE_ROOT
+            value: "true"
+          image: 'docker-registry.rahti.csc.fi/neic/indico:v5'
+          imagePullPolicy: Always
+          name: indico-celery
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 512Mi
+
+# indico-celery Service
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      io.kompose.service: indico-celery
+    name: indico-celery
+  spec:
+    ports:
+    - name: "8888"
+      port: 8888
+      targetPort: 8888
+    selector:
+      io.kompose.service: indico-celery
+
